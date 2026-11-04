@@ -553,3 +553,14 @@ async function printInvoiceTicket(invoiceId) {
     showToast('Error al preparar representaciÃ³n impresa: ' + err.message, 'error');
   }
 }
+// Advanced Filter Engine (Elena - MEDA-11)
+function filterInvoicesAdvanced(typeFilter = 'ALL', statusFilter = 'ALL') {
+  let filtered = [...allInvoices];
+  if (typeFilter !== 'ALL') {
+    filtered = filtered.filter(inv => inv.ecfType === typeFilter);
+  }
+  if (statusFilter !== 'ALL') {
+    filtered = filtered.filter(inv => inv.status === statusFilter);
+  }
+  renderTable(filtered);
+}
