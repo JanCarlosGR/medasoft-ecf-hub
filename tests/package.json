@@ -1,0 +1,10 @@
+{
+  "name": "medasoft-ecf-tests",
+  "version": "1.0.0",
+  "description": "Automated Integration Test Suite for Medasoft e-CF Hub",
+  "author": "Vector (QA Automation Engineer - Medasoft)",
+  "type": "module",
+  "scripts": {
+    "test": "node api-integration.test.mjs"
+  }
+}

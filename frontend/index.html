@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medasoft e-CF Hub | Facturación Electrónica DGII</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            meda: {
+              50: '#f0f7ff',
+              100: '#e0effe',
+              500: '#0284c7',
+              600: '#0369a1',
+              700: '#075985',
+              900: '#0c4a6e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans antialiased">
+
+  <!-- Top Navbar -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center text-white shadow-md">
+            <i class="fa-solid fa-file-invoice-dollar text-xl"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="font-bold text-xl tracking-tight text-slate-900">Medasoft</span>
+              <span class="bg-sky-100 text-sky-800 text-xs px-2 py-0.5 rounded-full font-semibold">e-CF Hub</span>
+            </div>
+            <p class="text-xs text-slate-500 font-medium">Facturación Electrónica República Dominicana (Ley 32-23)</p>
+          </div>
+        </div>
+
+        <!-- DGII Connection Status Pill & Actions -->
+        <div class="flex items-center space-x-4">
+          <div id="dgiiPill" class="flex items-center space-x-2 bg-emerald-50 border border-emerald-200 text-emerald-700 px-3 py-1 rounded-full text-xs font-semibold">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span id="dgiiStatusText">DGII En Línea (WS Certificado)</span>
+          </div>
+
+          <button id="btnOpenModal" class="inline-flex items-center space-x-2 bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow hover:shadow-md transition">
+            <i class="fa-solid fa-plus"></i>
+            <span>Emitir Comprobante (e-CF)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <!-- KPI Metric Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
+      <!-- Card 1 -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div>
+          <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Facturado</p>
+          <h3 id="statTotalMonto" class="text-2xl font-bold text-slate-900 mt-1">RD$ 0.00</h3>
+          <p class="text-xs text-emerald-600 mt-1 flex items-center">
+            <i class="fa-solid fa-arrow-trend-up mr-1"></i> Monto Bruto Acumulado
+          </p>
+        </div>
+        <div class="w-12 h-12 bg-sky-50 rounded-xl flex items-center justify-center text-sky-600 text-xl">
+          <i class="fa-solid fa-vault"></i>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div>
+          <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">ITBIS Liquidado (18%)</p>
+          <h3 id="statTotalItbis" class="text-2xl font-bold text-slate-900 mt-1">RD$ 0.00</h3>
+          <p class="text-xs text-slate-500 mt-1">Impuestos declarables DGII</p>
+        </div>
+        <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 text-xl">
+          <i class="fa-solid fa-receipt"></i>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div>
+          <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">e-CF Certificados</p>
+          <h3 id="statAcceptedCount" class="text-2xl font-bold text-slate-900 mt-1">0</h3>
+          <p class="text-xs text-emerald-600 mt-1 flex items-center">
+            <i class="fa-solid fa-circle-check mr-1"></i> 100% Tasa de Aprobación
+          </p>
+        </div>
+        <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 text-xl">
+          <i class="fa-solid fa-shield-check"></i>
+        </div>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div>
+          <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Tipos e-NCF Activos</p>
+          <h3 id="statTypesCount" class="text-2xl font-bold text-slate-900 mt-1">E31, E32</h3>
+          <p class="text-xs text-slate-500 mt-1">Crédito Fiscal y Consumo</p>
+        </div>
+        <div class="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600 text-xl">
+          <i class="fa-solid fa-tags"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- e-CF Management Table -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+      <div class="p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900">Histórico de Comprobantes Fiscales Electrónicos</h2>
+          <p class="text-xs text-slate-500">Transmisiones auditadas en tiempo real con TrackID certificado</p>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+            <input type="text" id="searchInput" placeholder="Buscar por e-NCF, RNC o TrackID..." class="pl-8 pr-4 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500 w-64">
+          </div>
+          <button id="btnRefresh" class="text-xs text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg font-medium transition">
+            <i class="fa-solid fa-arrows-rotate mr-1"></i> Actualizar
+          </button>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs text-slate-600">
+          <thead class="bg-slate-50 text-slate-500 uppercase font-semibold text-[11px] border-b border-slate-200">
+            <tr>
+              <th class="px-5 py-3">e-NCF</th>
+              <th class="px-5 py-3">Tipo</th>
+              <th class="px-5 py-3">Cliente / Razón Social</th>
+              <th class="px-5 py-3">RNC / Cédula</th>
+              <th class="px-5 py-3 text-right">Subtotal</th>
+              <th class="px-5 py-3 text-right">ITBIS (18%)</th>
+              <th class="px-5 py-3 text-right">Total (RD$)</th>
+              <th class="px-5 py-3">Estado DGII</th>
+              <th class="px-5 py-3 text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="invoiceTableBody" class="divide-y divide-slate-100">
+            <tr>
+              <td colspan="9" class="px-5 py-8 text-center text-slate-400">
+                <i class="fa-solid fa-spinner fa-spin text-lg mr-2"></i> Cargando comprobantes...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Agent Team Attribution Footer -->
+    <div class="bg-slate-100 rounded-2xl p-5 border border-slate-200">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+        <div>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">Equipo de Agentes Autónomos Medasoft</h4>
+          <p class="text-xs text-slate-500">Módulo desarrollado, validado y auditado por el equipo multidisciplinario de IA:</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-800">
+            <i class="fa-solid fa-brain mr-1.5"></i> Sofia (Requerimientos)
+          </span>
+          <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
+            <i class="fa-solid fa-server mr-1.5"></i> Marcus (Backend & NCF)
+          </span>
+          <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-pink-100 text-pink-800">
+            <i class="fa-solid fa-laptop-code mr-1.5"></i> Elena (Frontend UI)
+          </span>
+          <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-100 text-emerald-800">
+            <i class="fa-solid fa-vial-circle-check mr-1.5"></i> Vector (QA Automation)
+          </span>
+          <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-amber-100 text-amber-800">
+            <i class="fa-solid fa-shield-halved mr-1.5"></i> Echo (QA Auditor)
+          </span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal: Emitir Comprobante e-CF -->
+  <div id="emissionModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden animate-fadeIn">
+      <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-file-circle-check text-sky-600 text-lg"></i>
+          <h3 class="font-bold text-slate-900 text-base">Emitir Comprobante Fiscal Electrónico (e-CF)</h3>
+        </div>
+        <button id="btnCloseModal" class="text-slate-400 hover:text-slate-600 p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form id="emissionForm" class="p-6 space-y-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- e-NCF -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Número e-NCF (13 caracteres)</label>
+            <input type="text" id="ncfInput" required placeholder="Ej: E310000000002" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none uppercase font-mono">
+            <p id="ncfFeedback" class="text-[11px] text-slate-500 mt-1">Formato: E31 (Crédito Fiscal), E32 (Consumo), E34 (Nota Crédito)</p>
+          </div>
+
+          <!-- RNC Emisor -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">RNC Emisor (Medasoft)</label>
+            <input type="text" id="emisorInput" value="131456789" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none bg-slate-50 font-mono" readonly>
+            <p class="text-[11px] text-slate-400 mt-1">Certificado DGII Activo</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- RNC / Cédula Comprador -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">RNC / Cédula Receptor</label>
+            <input type="text" id="compradorRncInput" required placeholder="9 u 11 dígitos numéricos" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none font-mono">
+          </div>
+
+          <!-- Razón Social Comprador -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Razón Social o Nombre</label>
+            <input type="text" id="compradorNombreInput" required placeholder="Nombre del cliente o entidad" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none">
+          </div>
+        </div>
+
+        <!-- Líneas de Detalle -->
+        <div class="border-t border-slate-200 pt-4">
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Detalle de la Operación</label>
+          <div class="grid grid-cols-12 gap-2 text-xs">
+            <div class="col-span-6">
+              <input type="text" id="itemDescInput" required placeholder="Descripción del producto o servicio" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500">
+            </div>
+            <div class="col-span-2">
+              <input type="number" id="itemQtyInput" required min="1" value="1" placeholder="Cant." class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500">
+            </div>
+            <div class="col-span-4">
+              <input type="number" id="itemPriceInput" required min="0" step="0.01" placeholder="Precio Unit. (RD$)" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 font-mono">
+            </div>
+          </div>
+        </div>
+
+        <!-- Cálculo Resumido Dinámico -->
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs space-y-1.5 font-medium">
+          <div class="flex justify-between text-slate-600">
+            <span>Subtotal Neto:</span>
+            <span id="previewSubtotal" class="font-mono font-semibold">RD$ 0.00</span>
+          </div>
+          <div class="flex justify-between text-slate-600">
+            <span>ITBIS Estimado (18%):</span>
+            <span id="previewItbis" class="font-mono font-semibold">RD$ 0.00</span>
+          </div>
+          <div class="flex justify-between text-slate-900 font-bold text-sm pt-1 border-t border-slate-200">
+            <span>Total a Transmitir:</span>
+            <span id="previewTotal" class="font-mono text-sky-700">RD$ 0.00</span>
+          </div>
+        </div>
+
+        <div class="flex justify-end space-x-3 pt-2">
+          <button type="button" id="btnCancelModal" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 text-xs font-semibold hover:bg-slate-50 transition">
+            Cancelar
+          </button>
+          <button type="submit" id="btnSubmitInvoice" class="px-5 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-semibold shadow transition flex items-center space-x-1.5">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <span>Certificar y Emitir e-CF</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Detail Modal -->
+  <div id="detailModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden animate-fadeIn p-6 space-y-4">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-bold text-slate-900 text-base" id="detailModalTitle">Comprobante Fiscal Electrónico</h3>
+        <button id="btnCloseDetail" class="text-slate-400 hover:text-slate-600">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <div id="detailModalContent" class="text-xs text-slate-600 space-y-3 font-mono">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 space-y-2"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
