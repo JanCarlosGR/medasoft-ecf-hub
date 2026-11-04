@@ -194,6 +194,23 @@ async function main() {
     assert.ok(body.data.footer.legalNotice.includes('Ley No. 32-23'));
   });
 
+  // Test 11 (Vector QA Verification for Marcus - MEDA-10): Electronic Credit Note E34
+  await runTest('POST /api/invoices/:id/credit-note issues compliant E34 modification', async () => {
+    const res = await fetch(`${BASE_URL}/api/invoices/ecf-seed-001/credit-note`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ motivo: '01' })
+    });
+    assert.equal(res.status, 201);
+    const body = await res.json();
+    assert.equal(body.success, true);
+    assert.equal(body.data.creditNote.ecfType, 'E34');
+    assert.ok(body.data.creditNote.ncf.startsWith('E34'));
+    assert.ok(body.data.creditNote.montoTotal < 0, 'Credit note total must be negative to reverse balance');
+    assert.equal(body.data.creditNote.status, 'ACCEPTED');
+    assert.ok(body.data.creditNote.trackId.length > 0);
+  });
+
   // Summary
   console.log('\n---------------------------------------------------------------');
   console.log(` RESULTS: ${passedTests} Passed, ${failedTests} Failed.`);
