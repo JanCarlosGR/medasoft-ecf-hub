@@ -1,4 +1,4 @@
-﻿import { CreateInvoiceDTO, ECFType, Invoice, InvoiceItem, Receipt80mmData, DgiiQrPayload } from '../types/invoice';
+import { CreateInvoiceDTO, ECFType, Invoice, InvoiceItem, Receipt80mmData, DgiiQrPayload } from '../types/invoice';
 import { NcfValidator } from './ncfValidator';
 
 export class InvoiceService {
@@ -284,29 +284,28 @@ export class InvoiceService {
     }
 
     if (original.status === 'REJECTED') {
-      return { error: 'No se puede emitir Nota de CrÃ©dito sobre un comprobante ya rechazado' };
+      return { error: 'No se puede emitir Nota de Crédito sobre un comprobante ya rechazado' };
     }
 
     const ncfSeq = String(this.invoices.length + 10).padStart(10, '0');
-    const creditNcf = E34\;
+    const creditNcf = `E34${ncfSeq}`;
 
     const creditNote: Invoice = {
-      id: ecf-nc-\,
+      id: `ecf-nc-${Date.now()}`,
       ncf: creditNcf,
       ecfType: 'E34',
       emisorRnc: original.emisorRnc,
       compradorRnc: original.compradorRnc,
       compradorNombre: original.compradorNombre,
       fechaEmision: new Date().toISOString().split('T')[0],
-      items: original.items.map(it => ({ ...it, id: 
-c-\, total: -Math.abs(it.total) })),
+      items: original.items.map(it => ({ ...it, id: `nc-${it.id}`, total: -Math.abs(it.total) })),
       subtotal: -Math.abs(original.subtotal),
       itbisTotal: -Math.abs(original.itbisTotal),
       montoTotal: -Math.abs(original.montoTotal),
       trackId: this.generateTrackId(),
       status: 'ACCEPTED',
       dgiiResponseCode: '00',
-      dgiiResponseMessage: Nota de CrÃ©dito ElectrÃ³nica emitida con Ã©xito. Modifica e-NCF \ (Motivo: \).,
+      dgiiResponseMessage: `Nota de Crédito Electrónica emitida con éxito. Modifica e-NCF ${original.ncf} (Motivo: ${motivo}).`,
       createdAt: new Date().toISOString()
     };
 
