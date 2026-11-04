@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+﻿import { Router, Request, Response } from 'express';
 import { InvoiceService } from '../services/invoiceService';
 import { NcfValidator } from '../services/ncfValidator';
 import { CreateInvoiceDTO } from '../types/invoice';
@@ -23,7 +23,7 @@ router.get('/', (req: Request, res: Response) => {
   }
 });
 
-// GET /api/invoices/stats - Resumen de métricas fiscales
+// GET /api/invoices/stats - Resumen de mÃ©tricas fiscales
 router.get('/stats', (req: Request, res: Response) => {
   try {
     const stats = InvoiceService.getStats();
@@ -34,13 +34,13 @@ router.get('/stats', (req: Request, res: Response) => {
   } catch (err: any) {
     res.status(500).json({
       success: false,
-      message: 'Error al obtener estadísticas',
+      message: 'Error al obtener estadÃ­sticas',
       error: err.message
     });
   }
 });
 
-// POST /api/invoices/validate-ncf - Validación rápida de NCF para el Frontend
+// POST /api/invoices/validate-ncf - ValidaciÃ³n rÃ¡pida de NCF para el Frontend
 router.post('/validate-ncf', (req: Request, res: Response) => {
   const { ncf } = req.body;
   if (!ncf) {
@@ -62,7 +62,7 @@ router.post('/validate-ncf', (req: Request, res: Response) => {
     valid: true,
     ncf: ncf.toUpperCase(),
     type: result.prefix,
-    message: `e-NCF válido correspondiente a ${result.prefix}`
+    message: `e-NCF vÃ¡lido correspondiente a ${result.prefix}`
   });
 });
 
@@ -74,7 +74,7 @@ router.get('/:id', (req: Request, res: Response) => {
   if (!invoice) {
     return res.status(404).json({
       success: false,
-      message: `Comprobante electrónico no encontrado para el identificador: ${id}`
+      message: `Comprobante electrÃ³nico no encontrado para el identificador: ${id}`
     });
   }
 
@@ -84,7 +84,7 @@ router.get('/:id', (req: Request, res: Response) => {
   });
 });
 
-// GET /api/invoices/:id/qr - Obtener datos del Código QR oficial DGII y cadena criptográfica
+// GET /api/invoices/:id/qr - Obtener datos del CÃ³digo QR oficial DGII y cadena criptogrÃ¡fica
 router.get('/:id/qr', (req: Request, res: Response) => {
   const { id } = req.params;
   const invoice = InvoiceService.getById(id) || InvoiceService.getByNcf(id);
@@ -92,7 +92,7 @@ router.get('/:id/qr', (req: Request, res: Response) => {
   if (!invoice) {
     return res.status(404).json({
       success: false,
-      message: `Comprobante electrónico no encontrado: ${id}`
+      message: `Comprobante electrÃ³nico no encontrado: ${id}`
     });
   }
 
@@ -103,7 +103,7 @@ router.get('/:id/qr', (req: Request, res: Response) => {
   });
 });
 
-// GET /api/invoices/:id/print - Payload formateado para Representación Impresa (Ticket 80mm)
+// GET /api/invoices/:id/print - Payload formateado para RepresentaciÃ³n Impresa (Ticket 80mm)
 router.get('/:id/print', (req: Request, res: Response) => {
   const { id } = req.params;
   const receipt = InvoiceService.getReceiptData(id);
@@ -111,7 +111,7 @@ router.get('/:id/print', (req: Request, res: Response) => {
   if (!receipt) {
     return res.status(404).json({
       success: false,
-      message: `Comprobante electrónico no encontrado para impresión: ${id}`
+      message: `Comprobante electrÃ³nico no encontrado para impresiÃ³n: ${id}`
     });
   }
 
@@ -121,7 +121,7 @@ router.get('/:id/print', (req: Request, res: Response) => {
   });
 });
 
-// POST /api/invoices - Emitir nuevo comprobante electrónico
+// POST /api/invoices - Emitir nuevo comprobante electrÃ³nico
 router.post('/', (req: Request, res: Response) => {
   try {
     const dto: CreateInvoiceDTO = req.body;
@@ -131,7 +131,7 @@ router.post('/', (req: Request, res: Response) => {
     if (!validation.valid) {
       return res.status(400).json({
         success: false,
-        message: 'Fallo de validación de comprobante fiscal electrónico',
+        message: 'Fallo de validaciÃ³n de comprobante fiscal electrÃ³nico',
         errors: validation.errors
       });
     }
@@ -145,12 +145,12 @@ router.post('/', (req: Request, res: Response) => {
       });
     }
 
-    // 3. Procesar y certificar emisión
+    // 3. Procesar y certificar emisiÃ³n
     const created = InvoiceService.create(dto);
 
     return res.status(201).json({
       success: true,
-      message: 'Comprobante fiscal electrónico emitido y certificado con éxito ante DGII',
+      message: 'Comprobante fiscal electrÃ³nico emitido y certificado con Ã©xito ante DGII',
       data: created
     });
   } catch (err: any) {
@@ -160,6 +160,24 @@ router.post('/', (req: Request, res: Response) => {
       error: err.message
     });
   }
+});
+
+
+// POST /api/invoices/:id/credit-note - Emitir Nota de CrÃ©dito ElectrÃ³nica (E34) (Marcus - MEDA-10)
+router.post('/:id/credit-note', (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { motivo } = req.body;
+
+  const result = InvoiceService.issueCreditNote(id, motivo || '01');
+  if ('error' in result) {
+    return res.status(400).json({ success: false, message: result.error });
+  }
+
+  return res.status(201).json({
+    success: true,
+    message: 'Nota de CrÃ©dito ElectrÃ³nica (E34) emitida y certificada ante DGII',
+    data: result
+  });
 });
 
 export default router;

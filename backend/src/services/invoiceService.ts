@@ -1,11 +1,11 @@
-import { CreateInvoiceDTO, ECFType, Invoice, InvoiceItem, Receipt80mmData, DgiiQrPayload } from '../types/invoice';
+﻿import { CreateInvoiceDTO, ECFType, Invoice, InvoiceItem, Receipt80mmData, DgiiQrPayload } from '../types/invoice';
 import { NcfValidator } from './ncfValidator';
 
 export class InvoiceService {
   private static invoices: Invoice[] = [];
 
   static {
-    // Inicializar con comprobantes e-CF de prueba válidos
+    // Inicializar con comprobantes e-CF de prueba vÃ¡lidos
     this.seedInitialData();
   }
 
@@ -16,12 +16,12 @@ export class InvoiceService {
       ecfType: 'E31',
       emisorRnc: '131456789',
       compradorRnc: '101894231',
-      compradorNombre: 'SERVICIOS TECNOLÓGICOS DEL CARIBE SRL',
+      compradorNombre: 'SERVICIOS TECNOLÃ“GICOS DEL CARIBE SRL',
       fechaEmision: new Date(Date.now() - 3600000 * 24).toISOString().split('T')[0],
       items: [
         {
           id: 'item-1',
-          description: 'Suscripción Anual Plataforma Medasoft Cloud ERP',
+          description: 'SuscripciÃ³n Anual Plataforma Medasoft Cloud ERP',
           quantity: 1,
           unitPrice: 45000,
           isTaxable: true,
@@ -29,7 +29,7 @@ export class InvoiceService {
         },
         {
           id: 'item-2',
-          description: 'Servicio de Consultoría e Implementación DGII e-CF',
+          description: 'Servicio de ConsultorÃ­a e ImplementaciÃ³n DGII e-CF',
           quantity: 10,
           unitPrice: 3500,
           isTaxable: true,
@@ -52,7 +52,7 @@ export class InvoiceService {
       ecfType: 'E32',
       emisorRnc: '131456789',
       compradorRnc: '40219827361',
-      compradorNombre: 'JUAN PÉREZ ROSARIO (CONSUMIDOR FINAL)',
+      compradorNombre: 'JUAN PÃ‰REZ ROSARIO (CONSUMIDOR FINAL)',
       fechaEmision: new Date().toISOString().split('T')[0],
       items: [
         {
@@ -132,12 +132,12 @@ export class InvoiceService {
     const qr = this.generateDgiiQrData(invoice);
 
     const typeLabels: Record<string, string> = {
-      E31: 'FACTURA DE CRÉDITO FISCAL ELECTRÓNICA',
-      E32: 'FACTURA DE CONSUMO ELECTRÓNICA',
-      E33: 'NOTA DE DÉBITO ELECTRÓNICA',
-      E34: 'NOTA DE CRÉDITO ELECTRÓNICA',
-      E41: 'COMPROBANTE DE COMPRAS ELECTRÓNICO',
-      E44: 'REGÍMENES ESPECIALES ELECTRÓNICO'
+      E31: 'FACTURA DE CRÃ‰DITO FISCAL ELECTRÃ“NICA',
+      E32: 'FACTURA DE CONSUMO ELECTRÃ“NICA',
+      E33: 'NOTA DE DÃ‰BITO ELECTRÃ“NICA',
+      E34: 'NOTA DE CRÃ‰DITO ELECTRÃ“NICA',
+      E41: 'COMPROBANTE DE COMPRAS ELECTRÃ“NICO',
+      E44: 'REGÃMENES ESPECIALES ELECTRÃ“NICO'
     };
 
     let subtotalGravado = 0;
@@ -163,7 +163,7 @@ export class InvoiceService {
       invoice: {
         id: invoice.id,
         ncf: invoice.ncf,
-        ecfTypeName: typeLabels[invoice.ecfType] || 'COMPROBANTE FISCAL ELECTRÓNICO',
+        ecfTypeName: typeLabels[invoice.ecfType] || 'COMPROBANTE FISCAL ELECTRÃ“NICO',
         fechaEmision: invoice.fechaEmision,
         fechaVencimientoSecuencia: '31/12/2027',
         trackId: invoice.trackId,
@@ -190,9 +190,9 @@ export class InvoiceService {
       },
       qr,
       footer: {
-        legalNotice: 'Representación Impresa oficial del Comprobante Fiscal Electrónico (e-CF) conforme a la Ley No. 32-23 de Facturación Electrónica de la República Dominicana.',
-        dgiiNorm: 'Norma General 06-2018 DGII - Autorizado para emisión electrónica.',
-        printNotice: 'Escanee el código QR con cualquier dispositivo o ingrese a https://ecf.dgii.gov.do para verificar autenticidad.'
+        legalNotice: 'RepresentaciÃ³n Impresa oficial del Comprobante Fiscal ElectrÃ³nico (e-CF) conforme a la Ley No. 32-23 de FacturaciÃ³n ElectrÃ³nica de la RepÃºblica Dominicana.',
+        dgiiNorm: 'Norma General 06-2018 DGII - Autorizado para emisiÃ³n electrÃ³nica.',
+        printNotice: 'Escanee el cÃ³digo QR con cualquier dispositivo o ingrese a https://ecf.dgii.gov.do para verificar autenticidad.'
       }
     };
   }
@@ -229,7 +229,7 @@ export class InvoiceService {
     itbisTotal = Number(itbisTotal.toFixed(2));
     const montoTotal = Number((subtotal + itbisTotal).toFixed(2));
 
-    // 3. Generar TrackID único simulando WebService DGII
+    // 3. Generar TrackID Ãºnico simulando WebService DGII
     const trackId = this.generateTrackId();
 
     const invoice: Invoice = {
@@ -247,7 +247,7 @@ export class InvoiceService {
       trackId,
       status: 'ACCEPTED',
       dgiiResponseCode: '00',
-      dgiiResponseMessage: 'Comprobante recibido, certificado y registrado con éxito en ambiente de producción.',
+      dgiiResponseMessage: 'Comprobante recibido, certificado y registrado con Ã©xito en ambiente de producciÃ³n.',
       createdAt: new Date().toISOString()
     };
 
@@ -274,6 +274,44 @@ export class InvoiceService {
       acceptedCount: this.invoices.filter(i => i.status === 'ACCEPTED').length,
       byType
     };
+  }
+
+  
+  public static issueCreditNote(originalInvoiceId: string, motivo: string = '01'): { original: Invoice; creditNote: Invoice } | { error: string } {
+    const original = this.getById(originalInvoiceId) || this.getByNcf(originalInvoiceId);
+    if (!original) {
+      return { error: 'Comprobante original no encontrado' };
+    }
+
+    if (original.status === 'REJECTED') {
+      return { error: 'No se puede emitir Nota de CrÃ©dito sobre un comprobante ya rechazado' };
+    }
+
+    const ncfSeq = String(this.invoices.length + 10).padStart(10, '0');
+    const creditNcf = E34\;
+
+    const creditNote: Invoice = {
+      id: ecf-nc-\,
+      ncf: creditNcf,
+      ecfType: 'E34',
+      emisorRnc: original.emisorRnc,
+      compradorRnc: original.compradorRnc,
+      compradorNombre: original.compradorNombre,
+      fechaEmision: new Date().toISOString().split('T')[0],
+      items: original.items.map(it => ({ ...it, id: 
+c-\, total: -Math.abs(it.total) })),
+      subtotal: -Math.abs(original.subtotal),
+      itbisTotal: -Math.abs(original.itbisTotal),
+      montoTotal: -Math.abs(original.montoTotal),
+      trackId: this.generateTrackId(),
+      status: 'ACCEPTED',
+      dgiiResponseCode: '00',
+      dgiiResponseMessage: Nota de CrÃ©dito ElectrÃ³nica emitida con Ã©xito. Modifica e-NCF \ (Motivo: \).,
+      createdAt: new Date().toISOString()
+    };
+
+    this.invoices.unshift(creditNote);
+    return { original, creditNote };
   }
 
   private static generateTrackId(): string {
