@@ -1,4 +1,4 @@
-// Medasoft e-CF Hub Frontend Engine (Elena - Senior Frontend Architect)
+﻿// Medasoft e-CF Hub Frontend Engine (Elena - Senior Frontend Architect)
 const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
   ? 'http://localhost:4000/api' 
   : '/api';
@@ -11,7 +11,7 @@ let localInvoices = [
     ecfType: 'E31',
     emisorRnc: '131456789',
     compradorRnc: '101894231',
-    compradorNombre: 'SERVICIOS TECNOLÓGICOS DEL CARIBE SRL',
+    compradorNombre: 'SERVICIOS TECNOLÃ“GICOS DEL CARIBE SRL',
     fechaEmision: new Date().toISOString().split('T')[0],
     subtotal: 80000.00,
     itbisTotal: 14400.00,
@@ -28,7 +28,7 @@ let localInvoices = [
     ecfType: 'E32',
     emisorRnc: '131456789',
     compradorRnc: '40219827361',
-    compradorNombre: 'JUAN PÉREZ ROSARIO (CONSUMIDOR FINAL)',
+    compradorNombre: 'JUAN PÃ‰REZ ROSARIO (CONSUMIDOR FINAL)',
     fechaEmision: new Date().toISOString().split('T')[0],
     subtotal: 12500.00,
     itbisTotal: 2250.00,
@@ -126,7 +126,7 @@ function updateNcfValidation() {
   const regex = /^E(31|32|33|34|41|44)\d{10}$/;
 
   if (!val) {
-    ncfFeedback.textContent = 'Formato: E31 (Crédito Fiscal), E32 (Consumo), E34 (Nota Crédito)';
+    ncfFeedback.textContent = 'Formato: E31 (CrÃ©dito Fiscal), E32 (Consumo), E34 (Nota CrÃ©dito)';
     ncfFeedback.className = 'text-[11px] text-slate-500 mt-1';
     return;
   }
@@ -134,16 +134,16 @@ function updateNcfValidation() {
   if (regex.test(val)) {
     const type = val.substring(0, 3);
     const typeNames = {
-      E31: 'Factura de Crédito Fiscal Electrónica',
-      E32: 'Factura de Consumo Electrónica',
-      E33: 'Nota de Débito Electrónica',
-      E34: 'Nota de Crédito Electrónica',
-      E41: 'Comprobante de Compras Electrónico'
+      E31: 'Factura de CrÃ©dito Fiscal ElectrÃ³nica',
+      E32: 'Factura de Consumo ElectrÃ³nica',
+      E33: 'Nota de DÃ©bito ElectrÃ³nica',
+      E34: 'Nota de CrÃ©dito ElectrÃ³nica',
+      E41: 'Comprobante de Compras ElectrÃ³nico'
     };
-    ncfFeedback.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i> Formato válido: <strong>${typeNames[type] || type}</strong>`;
+    ncfFeedback.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i> Formato vÃ¡lido: <strong>${typeNames[type] || type}</strong>`;
     ncfFeedback.className = 'text-[11px] text-emerald-600 mt-1';
   } else {
-    ncfFeedback.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-500 mr-1"></i> Inválido (Debe ser E + 2 dígitos de tipo + 10 dígitos numéricos)`;
+    ncfFeedback.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-500 mr-1"></i> InvÃ¡lido (Debe ser E + 2 dÃ­gitos de tipo + 10 dÃ­gitos numÃ©ricos)`;
     ncfFeedback.className = 'text-[11px] text-rose-500 mt-1';
   }
 }
@@ -176,7 +176,7 @@ async function checkDgiiStatus() {
     const res = await fetch(`${API_BASE}/dgii/status`);
     if (res.ok) {
       const data = await res.json();
-      document.getElementById('dgiiStatusText').textContent = `DGII En Línea (${data.latencyMs}ms)`;
+      document.getElementById('dgiiStatusText').textContent = `DGII En LÃ­nea (${data.latencyMs}ms)`;
     }
   } catch {
     document.getElementById('dgiiStatusText').textContent = 'DGII Conectado (Simulador)';
@@ -188,7 +188,7 @@ function renderTable(invoices) {
     invoiceTableBody.innerHTML = `
       <tr>
         <td colspan="9" class="px-5 py-8 text-center text-slate-400">
-          No hay comprobantes electrónicos emitidos en este período.
+          No hay comprobantes electrÃ³nicos emitidos en este perÃ­odo.
         </td>
       </tr>
     `;
@@ -229,7 +229,7 @@ function renderTable(invoices) {
           <button onclick="showInvoiceDetail('${inv.id || inv.ncf}')" class="text-sky-600 hover:text-sky-800 font-semibold p-1" title="Ver Certificado">
             <i class="fa-solid fa-eye"></i>
           </button>
-          <button onclick="copyTrackId('${inv.trackId}')" class="text-slate-500 hover:text-slate-700 font-semibold p-1" title="Copiar TrackID">
+          <button onclick="printInvoiceTicket('${inv.id || inv.ncf}')" class="text-emerald-600 hover:text-emerald-800 font-semibold p-1" title="Imprimir Ticket 80mm con QR"><i class="fa-solid fa-receipt"></i></button> <button onclick="copyTrackId('${inv.trackId}')" class="text-slate-500 hover:text-slate-700 font-semibold p-1" title="Copiar TrackID">
             <i class="fa-solid fa-copy"></i>
           </button>
         </td>
@@ -270,11 +270,11 @@ function filterInvoices() {
 
 function exportToCsv607() {
   if (!allInvoices || allInvoices.length === 0) {
-    showToast('No hay comprobantes electrónicos para exportar.', 'error');
+    showToast('No hay comprobantes electrÃ³nicos para exportar.', 'error');
     return;
   }
 
-  // Encabezados estándar según formato 607 DGII
+  // Encabezados estÃ¡ndar segÃºn formato 607 DGII
   const headers = [
     'RNC_CEDULA_COMPRADOR',
     'TIPO_IDENTIFICACION',
@@ -398,12 +398,12 @@ async function handleInvoiceSubmission(e) {
       localInvoices.unshift(createdInvoice);
     }
 
-    showToast(`e-CF ${ncf} emitido con éxito. TrackID: ${createdInvoice.trackId}`, 'success');
+    showToast(`e-CF ${ncf} emitido con Ã©xito. TrackID: ${createdInvoice.trackId}`, 'success');
     emissionModal.classList.add('hidden');
     emissionForm.reset();
     await loadInvoices();
   } catch (err) {
-    showToast(`Error de emisión: ${err.message}`, 'error');
+    showToast(`Error de emisiÃ³n: ${err.message}`, 'error');
   } finally {
     submitBtn.disabled = false;
     submitBtn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up mr-1"></i> Certificar y Emitir e-CF`;
@@ -481,3 +481,75 @@ function showToast(message, type = 'info') {
   }, 4000);
 }
 
+
+// ============================================================================
+// REPRESENTACIÃ“N IMPRESA TICKET 80mm & QR DGII (Elena - Senior Frontend)
+// ============================================================================
+const ticketModal = document.getElementById('ticketModal');
+const btnCloseTicket = document.getElementById('btnCloseTicket');
+const btnCancelTicket = document.getElementById('btnCancelTicket');
+const btnPrintDirect = document.getElementById('btnPrintDirect');
+
+if (btnCloseTicket) btnCloseTicket.addEventListener('click', () => ticketModal.classList.add('hidden'));
+if (btnCancelTicket) btnCancelTicket.addEventListener('click', () => ticketModal.classList.add('hidden'));
+if (btnPrintDirect) btnPrintDirect.addEventListener('click', () => window.print());
+
+async function printInvoiceTicket(invoiceId) {
+  try {
+    showToast('Generando representaciÃ³n impresa (80mm)...', 'info');
+    let receipt;
+    try {
+      const res = await fetch(\/invoices/\/print);
+      if (res.ok) {
+        const body = await res.json();
+        receipt = body.data;
+      }
+    } catch (e) {
+      console.warn('Backend print endpoint fallback:', e);
+    }
+
+    if (!receipt) {
+      const inv = allInvoices.find(i => i.id === invoiceId || i.ncf === invoiceId) || allInvoices[0];
+      const qrUrl = https://ecf.dgii.gov.do/consultas/ecf?rncEmisor=\&rncComprador=\&encf=\&montoTotal=\&itbis=\&fechaEmision=\&codigoSeguridad=\;
+      receipt = {
+        company: { name: 'MEDASOFT DOMINICANA SRL', tradeName: 'MEDASOFT CLOUD ERP & e-CF HUB', rnc: inv.emisorRnc, address: 'Av. Winston Churchill #1099, Piantini, Sto Dgo' },
+        invoice: { ncf: inv.ncf, ecfTypeName: inv.ecfType === 'E31' ? 'FACTURA CRÃ‰DITO FISCAL' : 'FACTURA DE CONSUMO', fechaEmision: inv.fechaEmision, fechaVencimientoSecuencia: '31/12/2027', trackId: inv.trackId, codigoSeguridad: (inv.trackId || 'A1B2C3').slice(0,6).toUpperCase() },
+        buyer: { nombre: inv.compradorNombre, rnc: inv.compradorRnc },
+        items: inv.items || [{ description: 'Servicios de TecnologÃ­a y FacturaciÃ³n ElectrÃ³nica', quantity: 1, unitPrice: inv.subtotal, total: inv.subtotal }],
+        financials: { subtotalGravado: inv.subtotal, subtotalExento: 0, itbis18: inv.itbisTotal, montoTotal: inv.montoTotal },
+        qr: { verificationUrl: qrUrl, codigoSeguridad: (inv.trackId || 'A1B2C3').slice(0,6).toUpperCase() }
+      };
+    }
+
+    document.getElementById('tCompany').textContent = receipt.company.name;
+    document.getElementById('tEmisorRnc').textContent = receipt.company.rnc;
+    document.getElementById('tNcf').textContent = receipt.invoice.ncf;
+    document.getElementById('tEcfType').textContent = receipt.invoice.ecfTypeName;
+    document.getElementById('tFecha').textContent = receipt.invoice.fechaEmision;
+    document.getElementById('tVencimiento').textContent = receipt.invoice.fechaVencimientoSecuencia || '31/12/2027';
+    document.getElementById('tBuyerName').textContent = receipt.buyer.nombre;
+    document.getElementById('tBuyerRnc').textContent = receipt.buyer.rnc;
+
+    const itemsContainer = document.getElementById('tItemsList');
+    itemsContainer.innerHTML = receipt.items.map(it => 
+      <div class="flex justify-between py-0.5">
+        <span class="truncate max-w-[190px]">\x \</span>
+        <span class="font-bold">\</span>
+      </div>
+    ).join('');
+
+    document.getElementById('tSubtotalGravado').textContent = formatCurrency(receipt.financials.subtotalGravado);
+    document.getElementById('tSubtotalExento').textContent = formatCurrency(receipt.financials.subtotalExento || 0);
+    document.getElementById('tItbis').textContent = formatCurrency(receipt.financials.itbis18);
+    document.getElementById('tTotal').textContent = formatCurrency(receipt.financials.montoTotal);
+
+    const qrUrl = receipt.qr.verificationUrl;
+    document.getElementById('tQrImage').src = https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=\;
+    document.getElementById('tSecurityCode').textContent = receipt.qr.codigoSeguridad;
+    document.getElementById('tTrackId').textContent = TrackID: \;
+
+    ticketModal.classList.remove('hidden');
+  } catch (err) {
+    showToast('Error al preparar representaciÃ³n impresa: ' + err.message, 'error');
+  }
+}

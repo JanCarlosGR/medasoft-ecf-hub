@@ -49,3 +49,34 @@
   }
 }
 
+
+/* ==========================================================================
+   RepresentaciÃ³n Impresa Ticket 80mm - Optimizado para Impresoras TÃ©rmicas
+   ========================================================================== */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  #ticketPrintContent, #ticketPrintContent * {
+    visibility: visible !important;
+  }
+  #ticketPrintContent {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 76mm !important;
+    max-width: 76mm !important;
+    margin: 0 !important;
+    padding: 4mm !important;
+    box-shadow: none !important;
+    border: none !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+    color: #000 !important;
+    background: #fff !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
