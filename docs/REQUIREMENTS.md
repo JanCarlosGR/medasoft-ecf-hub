@@ -54,11 +54,15 @@ La plataforma soporta la validación y emisión de los comprobantes electrónico
 - **RF-06 (Dashboard Analítico Ejecutivo):**  
   Presentación interactiva de métricas clave (Total Facturado, ITBIS Acumulado, Cantidad de e-CF Emitidos, Distribución por Tipo de Comprobante).
 
+- **RF-07 (Exportación de Reporte Fiscal Formato 607 DGII):**  
+  Generación dinámica y descarga en formato CSV UTF-8 con BOM de las transacciones emitidas, conteniendo RNC/Cédula del comprador, tipo de comprobante, e-NCF, montos facturados, ITBIS 18% y TrackID de certificación. Implementado por Elena.
+
 ---
 
 ## 4. Historias de Usuario & Criterios de Aceptación (Gherkin)
 
 ### Historia 1: Emisión exitosa de Factura de Crédito Fiscal (E31)
+>
 > **Como** Operador de Facturación de Medasoft,  
 > **Quiero** registrar una factura con e-NCF tipo E31, ítems gravados y RNC válido,  
 > **Para** remitir el comprobante a la DGII y obtener el TrackID oficial de aceptación.
@@ -76,6 +80,7 @@ Scenario: Emisión exitosa de e-CF E31 con ITBIS
 ```
 
 ### Historia 2: Rechazo automático de e-NCF con formato inválido
+>
 > **Como** Auditor de Calidad del Sistema,  
 > **Quiero** que el sistema bloquee comprobantes que no cumplan la estructura DGII,  
 > **Para** evitar penalidades y rechazos en el receptor de la DGII.

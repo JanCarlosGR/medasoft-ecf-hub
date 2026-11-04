@@ -47,6 +47,7 @@ let allInvoices = [];
 const invoiceTableBody = document.getElementById('invoiceTableBody');
 const searchInput = document.getElementById('searchInput');
 const btnRefresh = document.getElementById('btnRefresh');
+const btnExportCsv = document.getElementById('btnExportCsv');
 const btnOpenModal = document.getElementById('btnOpenModal');
 const btnCloseModal = document.getElementById('btnCloseModal');
 const btnCancelModal = document.getElementById('btnCancelModal');
@@ -75,6 +76,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function setupEventListeners() {
   btnRefresh.addEventListener('click', loadInvoices);
+  if (btnExportCsv) {
+    btnExportCsv.addEventListener('click', exportToCsv607);
+  }
   searchInput.addEventListener('input', filterInvoices);
 
   // Modal controls
@@ -264,6 +268,68 @@ function filterInvoices() {
   renderTable(filtered);
 }
 
+function exportToCsv607() {
+  if (!allInvoices || allInvoices.length === 0) {
+    showToast('No hay comprobantes electrónicos para exportar.', 'error');
+    return;
+  }
+
+  // Encabezados estándar según formato 607 DGII
+  const headers = [
+    'RNC_CEDULA_COMPRADOR',
+    'TIPO_IDENTIFICACION',
+    'NUMERO_COMPROBANTE_FISCAL',
+    'FECHA_EMISION',
+    'MONTO_FACTURADO_NETO',
+    'ITBIS_FACTURADO_18',
+    'MONTO_TOTAL',
+    'DGII_TRACK_ID',
+    'ESTADO_DGII',
+    'RAZON_SOCIAL_COMPRADOR'
+  ];
+
+  const escapeCsv = (str) => {
+    if (str === null || str === undefined) return '""';
+    const clean = String(str).replace(/"/g, '""');
+    return `"${clean}"`;
+  };
+
+  const rows = allInvoices.map(inv => {
+    const cleanRnc = (inv.compradorRnc || '').replace(/\D/g, '');
+    const isRncComercial = cleanRnc.length === 9;
+    const tipoId = isRncComercial ? '1 - RNC' : '2 - CEDULA';
+    
+    return [
+      escapeCsv(cleanRnc || inv.compradorRnc),
+      escapeCsv(tipoId),
+      escapeCsv(inv.ncf),
+      escapeCsv(inv.fechaEmision),
+      Number(inv.subtotal || 0).toFixed(2),
+      Number(inv.itbisTotal || 0).toFixed(2),
+      Number(inv.montoTotal || 0).toFixed(2),
+      escapeCsv(inv.trackId),
+      escapeCsv(inv.status),
+      escapeCsv(inv.compradorNombre)
+    ].join(',');
+  });
+
+  // Prefijo BOM UTF-8 (\uFEFF) para garantizar apertura perfecta con acentos en Excel Windows
+  const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  
+  const link = document.createElement('a');
+  const today = new Date().toISOString().split('T')[0].replace(/-/g, '');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `Reporte_607_eCF_DGII_${today}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+
+  showToast(`Reporte Fiscal 607 generado y descargado (${allInvoices.length} comprobantes)`, 'success');
+}
+
 async function handleInvoiceSubmission(e) {
   e.preventDefault();
 
@@ -414,3 +480,4 @@ function showToast(message, type = 'info') {
     toast.remove();
   }, 4000);
 }
+
