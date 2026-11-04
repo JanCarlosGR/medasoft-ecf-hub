@@ -48,3 +48,62 @@ export interface ValidationResult {
   valid: boolean;
   errors: string[];
 }
+
+export interface DgiiQrPayload {
+  rncEmisor: string;
+  rncComprador: string;
+  encf: string;
+  montoTotal: string;
+  itbis: string;
+  fechaEmision: string;
+  codigoSeguridad: string;
+  verificationUrl: string;
+  qrContent: string;
+}
+
+export interface Receipt80mmData {
+  company: {
+    name: string;
+    rnc: string;
+    tradeName: string;
+    address: string;
+    phone: string;
+    website: string;
+  };
+  invoice: {
+    id: string;
+    ncf: string;
+    ecfTypeName: string;
+    fechaEmision: string;
+    fechaVencimientoSecuencia: string;
+    trackId: string;
+    codigoSeguridad: string;
+    status: string;
+  };
+  buyer: {
+    rnc: string;
+    nombre: string;
+  };
+  items: Array<{
+    description: string;
+    quantity: number;
+    unitPrice: number;
+    isTaxable: boolean;
+    total: number;
+  }>;
+  financials: {
+    subtotalGravado: number;
+    subtotalExento: number;
+    itbis18: number;
+    montoTotal: number;
+    currency: string;
+  };
+  qr: DgiiQrPayload;
+  footer: {
+    legalNotice: string;
+    dgiiNorm: string;
+    printNotice: string;
+  };
+}
+
+

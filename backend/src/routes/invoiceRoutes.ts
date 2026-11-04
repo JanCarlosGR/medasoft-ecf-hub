@@ -84,6 +84,43 @@ router.get('/:id', (req: Request, res: Response) => {
   });
 });
 
+// GET /api/invoices/:id/qr - Obtener datos del Código QR oficial DGII y cadena criptográfica
+router.get('/:id/qr', (req: Request, res: Response) => {
+  const { id } = req.params;
+  const invoice = InvoiceService.getById(id) || InvoiceService.getByNcf(id);
+
+  if (!invoice) {
+    return res.status(404).json({
+      success: false,
+      message: `Comprobante electrónico no encontrado: ${id}`
+    });
+  }
+
+  const qrData = InvoiceService.generateDgiiQrData(invoice);
+  return res.json({
+    success: true,
+    data: qrData
+  });
+});
+
+// GET /api/invoices/:id/print - Payload formateado para Representación Impresa (Ticket 80mm)
+router.get('/:id/print', (req: Request, res: Response) => {
+  const { id } = req.params;
+  const receipt = InvoiceService.getReceiptData(id);
+
+  if (!receipt) {
+    return res.status(404).json({
+      success: false,
+      message: `Comprobante electrónico no encontrado para impresión: ${id}`
+    });
+  }
+
+  return res.json({
+    success: true,
+    data: receipt
+  });
+});
+
 // POST /api/invoices - Emitir nuevo comprobante electrónico
 router.post('/', (req: Request, res: Response) => {
   try {
@@ -126,3 +163,4 @@ router.post('/', (req: Request, res: Response) => {
 });
 
 export default router;
+

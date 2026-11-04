@@ -57,6 +57,12 @@ La plataforma soporta la validación y emisión de los comprobantes electrónico
 - **RF-07 (Exportación de Reporte Fiscal Formato 607 DGII):**  
   Generación dinámica y descarga en formato CSV UTF-8 con BOM de las transacciones emitidas, conteniendo RNC/Cédula del comprador, tipo de comprobante, e-NCF, montos facturados, ITBIS 18% y TrackID de certificación. Implementado por Elena.
 
+- **RF-08 (Cripto-Payload & URL de Código QR DGII):**  
+  Construcción de la cadena canónica de consulta ciudadana (`https://ecf.dgii.gov.do/consultas/ecf?...`) y parámetros fiscales (RNC emisor, RNC comprador, e-NCF, monto total, ITBIS, fecha de emisión y código de seguridad de 6 dígitos) según Norma General 06-2018 DGII. Endpoint: `GET /api/invoices/:id/qr`. Implementado por Marcus.
+
+- **RF-09 (Representación Impresa Formato Ticket 80mm):**  
+  Generación de estructura completa de datos para impresión térmica de 80mm con encabezado corporativo, datos del receptor, desglose de ítems gravados/exentos, liquidación fiscal, pie legal Ley 32-23 y payload para Código QR reactivo. Endpoint: `GET /api/invoices/:id/print`. Implementado por Marcus.
+
 ---
 
 ## 4. Historias de Usuario & Criterios de Aceptación (Gherkin)

@@ -169,6 +169,31 @@ async function main() {
     assert.ok(data.errors.some(e => e.includes('no puede ser negativo')));
   });
 
+  // Test 9 (Marcus - MEDA-7): DGII QR Verification payload contract
+  await runTest('GET /api/invoices/:id/qr returns DGII verification URL & params', async () => {
+    const res = await fetch(`${BASE_URL}/api/invoices/ecf-seed-001/qr`);
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.equal(body.success, true);
+    assert.ok(body.data.verificationUrl.includes('https://ecf.dgii.gov.do/consultas/ecf'));
+    assert.ok(body.data.verificationUrl.includes('encf=E310000000001'));
+    assert.equal(body.data.rncEmisor, '131456789');
+    assert.ok(body.data.codigoSeguridad.length >= 6);
+  });
+
+  // Test 10 (Marcus - MEDA-7): 80mm Ticket Print Data
+  await runTest('GET /api/invoices/:id/print returns 80mm thermal receipt payload', async () => {
+    const res = await fetch(`${BASE_URL}/api/invoices/ecf-seed-001/print`);
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.equal(body.success, true);
+    assert.equal(body.data.company.name, 'MEDASOFT DOMINICANA SRL');
+    assert.equal(body.data.invoice.ncf, 'E310000000001');
+    assert.ok(body.data.financials.montoTotal > 0);
+    assert.ok(body.data.qr.verificationUrl.length > 0);
+    assert.ok(body.data.footer.legalNotice.includes('Ley No. 32-23'));
+  });
+
   // Summary
   console.log('\n---------------------------------------------------------------');
   console.log(` RESULTS: ${passedTests} Passed, ${failedTests} Failed.`);

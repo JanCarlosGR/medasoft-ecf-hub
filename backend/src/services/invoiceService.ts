@@ -1,4 +1,4 @@
-import { CreateInvoiceDTO, ECFType, Invoice, InvoiceItem } from '../types/invoice';
+import { CreateInvoiceDTO, ECFType, Invoice, InvoiceItem, Receipt80mmData, DgiiQrPayload } from '../types/invoice';
 import { NcfValidator } from './ncfValidator';
 
 export class InvoiceService {
@@ -91,6 +91,112 @@ export class InvoiceService {
     return this.invoices.find(inv => inv.ncf.toUpperCase() === ncf.toUpperCase().trim());
   }
 
+  public static generateDgiiQrData(invoice: Invoice): DgiiQrPayload {
+    const rncEmisor = invoice.emisorRnc.replace(/[-\s]/g, '');
+    const rncComprador = invoice.compradorRnc.replace(/[-\s]/g, '');
+    const encf = invoice.ncf.trim().toUpperCase();
+    const montoTotal = invoice.montoTotal.toFixed(2);
+    const itbis = invoice.itbisTotal.toFixed(2);
+    const fechaEmision = invoice.fechaEmision;
+    const codigoSeguridad = (invoice.trackId.replace(/-/g, '').slice(0, 6)).toUpperCase();
+
+    const params = new URLSearchParams({
+      rncEmisor,
+      rncComprador,
+      encf,
+      montoTotal,
+      itbis,
+      fechaEmision,
+      codigoSeguridad
+    });
+
+    const verificationUrl = `https://ecf.dgii.gov.do/consultas/ecf?${params.toString()}`;
+
+    return {
+      rncEmisor,
+      rncComprador,
+      encf,
+      montoTotal,
+      itbis,
+      fechaEmision,
+      codigoSeguridad,
+      verificationUrl,
+      qrContent: verificationUrl
+    };
+  }
+
+  public static getReceiptData(id: string): Receipt80mmData | undefined {
+    const invoice = this.getById(id) || this.getByNcf(id);
+    if (!invoice) return undefined;
+
+    const qr = this.generateDgiiQrData(invoice);
+
+    const typeLabels: Record<string, string> = {
+      E31: 'FACTURA DE CRÉDITO FISCAL ELECTRÓNICA',
+      E32: 'FACTURA DE CONSUMO ELECTRÓNICA',
+      E33: 'NOTA DE DÉBITO ELECTRÓNICA',
+      E34: 'NOTA DE CRÉDITO ELECTRÓNICA',
+      E41: 'COMPROBANTE DE COMPRAS ELECTRÓNICO',
+      E44: 'REGÍMENES ESPECIALES ELECTRÓNICO'
+    };
+
+    let subtotalGravado = 0;
+    let subtotalExento = 0;
+
+    invoice.items.forEach(item => {
+      if (item.isTaxable) {
+        subtotalGravado += item.total;
+      } else {
+        subtotalExento += item.total;
+      }
+    });
+
+    return {
+      company: {
+        name: 'MEDASOFT DOMINICANA SRL',
+        tradeName: 'MEDASOFT CLOUD ERP & e-CF HUB',
+        rnc: invoice.emisorRnc,
+        address: 'Av. Winston Churchill #1099, Torre Citi, Piantini, Sto Dgo',
+        phone: '(809) 555-0199 / (809) 555-0200',
+        website: 'https://medasoft.do'
+      },
+      invoice: {
+        id: invoice.id,
+        ncf: invoice.ncf,
+        ecfTypeName: typeLabels[invoice.ecfType] || 'COMPROBANTE FISCAL ELECTRÓNICO',
+        fechaEmision: invoice.fechaEmision,
+        fechaVencimientoSecuencia: '31/12/2027',
+        trackId: invoice.trackId,
+        codigoSeguridad: qr.codigoSeguridad,
+        status: invoice.status
+      },
+      buyer: {
+        rnc: invoice.compradorRnc,
+        nombre: invoice.compradorNombre
+      },
+      items: invoice.items.map(it => ({
+        description: it.description,
+        quantity: it.quantity,
+        unitPrice: it.unitPrice,
+        isTaxable: it.isTaxable,
+        total: it.total
+      })),
+      financials: {
+        subtotalGravado: Number(subtotalGravado.toFixed(2)),
+        subtotalExento: Number(subtotalExento.toFixed(2)),
+        itbis18: invoice.itbisTotal,
+        montoTotal: invoice.montoTotal,
+        currency: 'DOP (RD$)'
+      },
+      qr,
+      footer: {
+        legalNotice: 'Representación Impresa oficial del Comprobante Fiscal Electrónico (e-CF) conforme a la Ley No. 32-23 de Facturación Electrónica de la República Dominicana.',
+        dgiiNorm: 'Norma General 06-2018 DGII - Autorizado para emisión electrónica.',
+        printNotice: 'Escanee el código QR con cualquier dispositivo o ingrese a https://ecf.dgii.gov.do para verificar autenticidad.'
+      }
+    };
+  }
+
   public static create(dto: CreateInvoiceDTO): Invoice {
     // 1. Extraer tipo de e-CF
     const ncfValidation = NcfValidator.validateNcf(dto.ncf);
@@ -175,3 +281,4 @@ export class InvoiceService {
     return `${hex()}${hex()}-${hex()}-4${hex().substr(0, 3)}-a${hex().substr(0, 3)}-${hex()}${hex()}${hex()}`;
   }
 }
+

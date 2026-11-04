@@ -124,3 +124,4 @@ node api-integration.test.mjs
 ## 📄 Licencia
 
 Desarrollado para el ecosistema **Medasoft** bajo licencia MIT. Cumple con la normativa oficial DGII Ley 32-23 República Dominicana.
+
